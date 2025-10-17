@@ -1,5 +1,7 @@
 <?php
-// public/index.php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /**
  * AUTOLOADER MANUAL

@@ -1,0 +1,262 @@
+/* --- GERAL E TIPOGRAFIA --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    color: #2c3e50;
+    margin-top: 0;
+}
+
+a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- BARRA DE NAVEGAÇÃO (HEADER) --- */
+.navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e7e7e7;
+    padding: 1rem 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.navbar-brand:hover {
+    text-decoration: none;
+}
+
+.navbar-menu a {
+    margin-left: 20px;
+    font-size: 1em;
+    font-weight: 500;
+}
+
+/* --- CONTEÚDO PRINCIPAL (MAIN) --- */
+main.container {
+    background-color: #ffffff;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* --- LISTA DE ENQUETES --- */
+.enquete-lista {
+    list-style: none;
+    padding: 0;
+}
+
+.enquete-lista li {
+    padding: 15px;
+    border-bottom: 1px solid #ecf0f1;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.enquete-lista li:last-child {
+    border-bottom: none;
+}
+
+.enquete-lista li:hover {
+    background-color: #f8f9fa;
+}
+
+.enquete-lista a {
+    display: block;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+/* --- FORMULÁRIO DE VOTAÇÃO --- */
+.opcoes-lista {
+    list-style: none;
+    padding: 0;
+    margin: 20px 0;
+}
+
+.opcoes-lista li {
+    padding: 10px;
+    margin-bottom: 8px;
+    background-color: #fdfdfd;
+    border: 1px solid #ecf0f1;
+    border-radius: 5px;
+}
+
+.opcoes-lista label {
+    display: block;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+
+input[type="radio"] {
+    margin-right: 10px;
+}
+
+button[type="submit"] {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.1em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button[type="submit"]:hover {
+    background-color: #2980b9;
+}
+
+
+/* --- RODAPÉ (FOOTER) --- */
+.footer {
+    text-align: center;
+    padding: 20px 0;
+    color: #7f8c8d;
+    font-size: 0.9em;
+}
+
+/* --- ESTILOS PARA A ÁREA ADMINISTRATIVA --- */
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ecf0f1;
+    padding-bottom: 15px;
+}
+
+.btn-criar {
+    background-color: #27ae60;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.btn-criar:hover {
+    background-color: #229954;
+    text-decoration: none;
+}
+
+.tabela-admin {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tabela-admin th, .tabela-admin td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.tabela-admin th {
+    background-color: #f2f2f2;
+}
+
+.tabela-admin tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+}
+.status-ativa { background-color: #27ae60; }
+.status-inativa { background-color: #e74c3c; }
+
+.acoes a, .acoes button { /* Adicionamos 'button' ao seletor */
+    margin-right: 8px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.9em;
+    border: none; /* Garante que o botão não tenha borda padrão */
+    cursor: pointer; /* Mostra a mãozinha ao passar o mouse */
+    font-family: inherit; /* Faz o botão usar a mesma fonte do resto da página */
+}
+.acoes a:hover, .acoes button:hover { /* Adicionamos 'button' ao seletor */
+    text-decoration: none; 
+    opacity: 0.8; 
+}
+.btn-resultados { background-color: #3498db; }
+.btn-editar { background-color: #f39c12; }
+.btn-excluir { background-color: #c0392b !important;  }
+
+
+/* --- FORMULÁRIO ADMIN --- */
+.form-admin {
+    margin-top: 20px;
+}
+.form-grupo {
+    margin-bottom: 20px;
+}
+.form-grupo label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+.form-grupo input[type="text"],
+.form-grupo textarea,
+.form-grupo select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante para o padding não aumentar a largura */
+}
+.form-grupo textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+.form-acoes {
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+.btn-principal {
+    background-color: #27ae60;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    border: none;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+.btn-secundario {
+    background-color: #7f8c8d;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 5px;
+    margin-left: 10px;
+}
+
