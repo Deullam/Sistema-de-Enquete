@@ -43,7 +43,9 @@ class AdminController extends Controller
     {
         $this->verificarLogin();
         $dadosParaView = [
-            'pageTitle' => 'Criar Nova Enquete'
+            'pageTitle' => 'Criar Nova Enquete',
+            'modoEdicao' => false, // Informa explicitamente que NÃO é modo de edição
+            'enquete' => null // Passa um valor nulo para evitar erros na view
             // Não passamos uma enquete, então o formulário ficará vazio
         ];
         $this->view('features/admin/views/formEnquete', $dadosParaView);
@@ -68,6 +70,7 @@ class AdminController extends Controller
 
         $dadosParaView = [
             'pageTitle' => 'Editar Enquete: ' . $enquete['titulo'],
+            'modoEdicao' => true,
             'enquete' => $enquete // Passa os dados da enquete para a view
         ];
         $this->view('features/admin/views/formEnquete', $dadosParaView);
@@ -194,52 +197,52 @@ class AdminController extends Controller
     /**
      * Processa a tentativa de login.
      */
-   public function autenticar()
-{
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        header('Location: /admin/login');
-        exit;
-    }
+    public function autenticar()
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /admin/login');
+            exit;
+        }
 
-    $nomeUsuario = $_POST['nome_usuario'] ?? '';
-    $senha = $_POST['senha'] ?? '';
+        $nomeUsuario = $_POST['nome_usuario'] ?? '';
+        $senha = $_POST['senha'] ?? '';
 
-    $usuario = $this->usuarioRepository->buscarPorUsuarioOuEmail($nomeUsuario);
+        $usuario = $this->usuarioRepository->buscarPorUsuarioOuEmail($nomeUsuario);
 
-    // --- LÓGICA DE AUTENTICAÇÃO COM MODO DE TESTE ---
+        // --- LÓGICA DE AUTENTICAÇÃO COM MODO DE TESTE ---
 
-    $loginAprovado = false;
+        $loginAprovado = false;
 
-    if ($usuario) {
-        // 1. Tenta a verificação segura primeiro (para o usuário 'admin')
-        if (password_verify($senha, $usuario['senha'])) {
-            $loginAprovado = true;
-        } 
-        // 2. Se a primeira falhar, tenta a verificação insegura (para o usuário 'tester')
-        else if ($senha === $usuario['senha']) {
-            // AVISO: Isto é inseguro e SÓ deve ser usado para depuração!
-            $loginAprovado = true;
+        if ($usuario) {
+            // 1. Tenta a verificação segura primeiro (para o usuário 'admin')
+            if (password_verify($senha, $usuario['senha'])) {
+                $loginAprovado = true;
+            }
+            // 2. Se a primeira falhar, tenta a verificação insegura (para o usuário 'tester')
+            else if ($senha === $usuario['senha']) {
+                // AVISO: Isto é inseguro e SÓ deve ser usado para depuração!
+                $loginAprovado = true;
+            }
+        }
+
+        // --- FIM DA LÓGICA DE AUTENTICAÇÃO ---
+
+        if ($loginAprovado) {
+            // Login bem-sucedido! Inicia a sessão.
+            $_SESSION['usuario_id'] = $usuario['id'];
+            $_SESSION['usuario_nome'] = $usuario['nome_usuario'];
+
+            header('Location: /admin/dashboard');
+            exit;
+        } else {
+            // Credenciais inválidas para ambos os métodos.
+            $dadosParaView = [
+                'pageTitle' => 'Login - Erro',
+                'erro' => 'Usuário ou senha inválidos.'
+            ];
+            $this->view('features/admin/views/login', $dadosParaView);
         }
     }
-
-    // --- FIM DA LÓGICA DE AUTENTICAÇÃO ---
-
-    if ($loginAprovado) {
-        // Login bem-sucedido! Inicia a sessão.
-        $_SESSION['usuario_id'] = $usuario['id'];
-        $_SESSION['usuario_nome'] = $usuario['nome_usuario'];
-
-        header('Location: /admin/dashboard');
-        exit;
-    } else {
-        // Credenciais inválidas para ambos os métodos.
-        $dadosParaView = [
-            'pageTitle' => 'Login - Erro',
-            'erro' => 'Usuário ou senha inválidos.'
-        ];
-        $this->view('features/admin/views/login', $dadosParaView);
-    }
-}
 
     /**
      * Faz o logout do usuário.
