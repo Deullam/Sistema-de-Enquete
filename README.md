@@ -43,7 +43,7 @@ Antes de começar, garanta que você tem os seguintes softwares instalados:
     *   PHP 8 ou superior
     *   MySQL Server
     *   Um cliente de banco de dados (DBeaver, HeidiSQL, phpMyAdmin)
-*   **Para rodar com Docker:**
+*   **Para rodar com Docker:** (Em progresso)
     *   Docker
     *   Docker Compose
 
@@ -51,7 +51,7 @@ Antes de começar, garanta que você tem os seguintes softwares instalados:
 
 Você pode executar o projeto de duas maneiras: utilizando Docker (recomendado para facilidade) ou manualmente com um ambiente PHP local.
 
-### Método 1: 🐳 Com Docker (Recomendado)
+### Método 1: 🐳 Com Docker (Em progresso)
 
 Esta é a forma mais simples de rodar o projeto, pois o Docker cuida de toda a configuração do ambiente.
 
