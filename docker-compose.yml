@@ -1,0 +1,56 @@
+name: deullam-enquete
+
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php_app
+    ports:
+      - "8888:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./app:/var/www/html/app
+      - ./tests:/var/www/html/tests
+    depends_on:
+      - db
+    networks:
+      - devnetsenac
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: deullam
+      MYSQL_USER: deullam
+      MYSQL_PASSWORD: deullam
+    ports:
+      - "3308:3308"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./deullam.sql:/docker-entrypoint-initdb.d/deullam.sql
+    networks:
+      - devnetsenac
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - db
+    networks:
+      - devnetsenac
+
+volumes:
+  db_data:
+
+networks:
+  devnetsenac:
+    driver: bridge

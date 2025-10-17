@@ -19,11 +19,11 @@ class Database
     private function __construct()
     {
         $this->loadEnv();
-
+        // The default values are for docker environment
         $this->host = getenv('DB_HOST') ?: 'localhost';
         $this->db_name = getenv('DB_NAME') ?: 'deullam';
-        $this->username = getenv('DB_USER') ?: 'root';
-        $this->password = getenv('DB_PASS') ?: '';
+        $this->username = getenv('DB_USER') ?: 'deullam';
+        $this->password = getenv('DB_PASS') ?: 'deullam';
     }
 
     /**
