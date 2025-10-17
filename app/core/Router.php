@@ -3,82 +3,93 @@
 
 namespace App\Core; // Use namespaces!
 
-class Router {
-    protected $controller = 'App\Features\Enquetes\Controllers\EnqueteController'; // Controller padrão
+class Router
+{
+    /**
+     * Armazena o nome da classe do controller (string) ou a instância (objeto).
+     * @var string|object
+     */
+    protected string|object $controller = 'App\Features\Enquetes\Controllers\EnqueteController';
     protected $method = 'index'; // Método padrão
     protected $params = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         // O construtor fica vazio. A lógica vai para o dispatch.
     }
 
-    private function parseUrl() {
-        if (isset($_GET['url'])) {
-            return explode('/', filter_var(rtrim($_GET['url'], '/'), FILTER_SANITIZE_URL));
-        }
-        return [];
-    }
-
-    public function dispatch() {
+    public function dispatch()
+    {
         $url = $this->parseUrl();
 
-        // Parte 1: Determinar o Controller
-        // Se a URL for 'enquetes', usamos o EnqueteController.
-        // Se for 'admin', usamos o AdminController, etc.
-        if (!empty($url[0])) {
-            $controllerName = ucfirst(strtolower($url[0])); // Ex: 'enquetes' -> 'Enquetes'
-            
-            // ATENÇÃO: A sua estrutura é 'features/admin' e 'features/enquetes'.
-            // O nome do controller é diferente (AdminController vs EnqueteController).
-            // Vamos fazer um mapeamento simples por enquanto.
-            
-            $featureName = strtolower($url[0]); // 'enquetes' ou 'admin'
-            $controllerClass = 'App\\Features\\' . $featureName . '\\Controllers\\' . $controllerName . 'Controller';
+        // Lógica Específica para o Admin
+        if (isset($url[0]) && $url[0] === 'admin') {
+            $this->controller = 'App\\Features\\Admin\\Controllers\\AdminController';
+            unset($url[0]);
 
-            // Ajuste manual para o seu caso específico
-            if ($featureName === 'enquetes') {
-                $controllerClass = 'App\\Features\\Enquetes\\Controllers\\EnqueteController';
-            }
-            if ($featureName === 'admin') {
-                $controllerClass = 'App\\Features\\Admin\\Controllers\\AdminController';
-            }
-
-            if (class_exists($controllerClass)) {
-                $this->controller = $controllerClass;
-                unset($url[0]);
-            } else {
-                $this->show404("Controller não encontrado: " . $controllerClass);
-                return;
-            }
-        }
-
-        // Instancia o controller
-        $this->controller = new $this->controller;
-
-        // Parte 2: Determinar o Método
-        if (isset($url[1])) {
-            if (method_exists($this->controller, $url[1])) {
+            // O método é a segunda parte da URL (ou 'dashboard' como padrão)
+            if (isset($url[1])) {
                 $this->method = $url[1];
                 unset($url[1]);
+            } else {
+                $this->method = 'dashboard'; // Se for só /admin, vai para o dashboard
             }
         }
-        
-        // Parte 3: Obter os Parâmetros
-        $this->params = $url ? array_values($url) : [];
+        // Lógica para a Área Pública (Enquetes)
+        else if (isset($url[0]) && $url[0] === 'enquetes') {
+            $this->controller = 'App\\Features\\Enquetes\\Controllers\\EnqueteController';
+            unset($url[0]);
 
-        // Chama o método do controller com os parâmetros
-        try {
-            call_user_func_array([$this->controller, $this->method], $this->params);
-        } catch (\Exception $e) {
-            $this->show404("Erro ao executar método: " . $e->getMessage());
+            if (isset($url[1])) {
+                // Se a segunda parte for um método que existe (ex: 'votar'), use-o
+                if (method_exists($this->controller, $url[1])) {
+                    $this->method = $url[1];
+                    unset($url[1]);
+                } else {
+                    // Senão, é um slug para o método 'exibir'
+                    $this->method = 'exibir';
+                    $this->params[] = $url[1];
+                    unset($url[1]);
+                }
+            } else {
+                $this->method = 'index'; // /enquetes vai para o index
+            }
         }
+        // Adicione mais 'else if' aqui para outras áreas do site no futuro.
+
+        // Instancia o controller
+        if (!class_exists($this->controller)) {
+            $this->show404("Controller não encontrado: " . $this->controller);
+            return;
+        }
+        $this->controller = new $this->controller;
+
+        // Pega os parâmetros restantes
+        $this->params = array_merge($this->params, $url ? array_values($url) : []);
+
+        // Verifica se o método existe e chama
+        if (!method_exists($this->controller, $this->method)) {
+            $this->show404("Método não encontrado: " . $this->method . " no controller " . get_class($this->controller));
+            return;
+        }
+
+        call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
-    private function show404($message = "Página não encontrada") {
-        http_response_code(404 );
-        // Para depuração, é útil ver a mensagem.
-        echo "<h1>Erro 404</h1>";
-        echo "<p>{$message}</p>";
+
+    private function parseUrl(): array
+    {
+        // Este método pega a URL do 'server.php' e a divide.
+        // O 'server.php' coloca a URL em $_SERVER['REQUEST_URI']
+        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $uri = trim($uri, '/');
+        return explode('/', $uri);
+    }
+
+    private function show404($message = "Página não encontrada")
+    {
+        http_response_code(404);
+        echo "<h1>Erro 404</h1><p>{$message}</p>";
         exit;
     }
 }

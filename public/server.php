@@ -1,18 +1,22 @@
 <?php
-// public/server.php
+// public/server.php - VERSÃO FINAL
 
-// Pega o caminho da URL solicitada.
-$uri = urldecode(
-    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH)
-);
+// Pega a URL solicitada, por exemplo: /css/estilo.css
+$path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Este arquivo não deve ser servido diretamente.
-if ($uri !== '/' && file_exists(__DIR__ . $uri)) {
-    // Se a requisição for para um arquivo existente (como CSS, JS, imagem),
-    // retorne 'false' para que o servidor embutido sirva o arquivo diretamente.
+// O caminho para a pasta 'public' é o diretório onde este script (server.php) está.
+$publicPath = __DIR__;
+
+// Constrói o caminho completo no sistema de arquivos.
+// Ex: C:\Project\Deullam-Enquete\public/css/estilo.css
+$filePath = $publicPath . $path;
+
+// Se o caminho aponta para um arquivo que realmente existe...
+if (file_exists($filePath) && !is_dir($filePath)) {
+    // ...então retorne 'false'. Isso diz ao servidor PHP: "Pare tudo e apenas sirva este arquivo".
     return false;
 }
 
-// Para todas as outras requisições, inclua o seu front-controller (index.php).
-// É aqui que a "mágica" do roteamento acontece.
+// Se não for um arquivo (ex: /enquetes), a requisição deve ser tratada pelo roteador.
+// Carrega o index.php para que o Router.php assuma o controle.
 require_once __DIR__ . '/index.php';
