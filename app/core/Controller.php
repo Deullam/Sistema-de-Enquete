@@ -1,5 +1,4 @@
 <?php
-// Adicione o namespace para o autoloader encontrar a classe
 namespace App\Core;
 
 class Controller

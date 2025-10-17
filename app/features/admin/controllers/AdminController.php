@@ -4,15 +4,18 @@ namespace App\Features\Admin\Controllers;
 
 use App\Core\Controller;
 use App\Features\Enquetes\Models\EnqueteRepository; // Vamos reutilizar o repositório de enquetes
+use App\Features\Admin\Models\UsuarioRepository; // Adiciona o repositório de usuários
 
 class AdminController extends Controller
 {
     private EnqueteRepository $enqueteRepository;
+    private UsuarioRepository $usuarioRepository;
 
     public function __construct()
     {
         // Instancia o repositório para que possamos usá-lo nos métodos
         $this->enqueteRepository = new EnqueteRepository();
+        $this->usuarioRepository = new UsuarioRepository();
     }
 
     /**
@@ -20,6 +23,7 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
+        $this->verificarLogin();
         // Busca todas as enquetes do banco de dados usando o novo método que vamos criar
         $todasAsEnquetes = $this->enqueteRepository->findAll();
 
@@ -37,6 +41,7 @@ class AdminController extends Controller
      */
     public function criar()
     {
+        $this->verificarLogin();
         $dadosParaView = [
             'pageTitle' => 'Criar Nova Enquete'
             // Não passamos uma enquete, então o formulário ficará vazio
@@ -50,6 +55,7 @@ class AdminController extends Controller
      */
     public function editar(int $id)
     {
+        $this->verificarLogin();
         // Busca a enquete e suas opções no banco de dados
         $enquete = $this->enqueteRepository->findByIdWithOptions($id);
 
@@ -73,13 +79,11 @@ class AdminController extends Controller
      */
     public function salvar(?int $id = null)
     {
-        // Garante que o método só seja acessível via POST
+        $this->verificarLogin();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/dashboard');
             exit;
         }
-
-        // 1. Coleta e sanitiza os dados do formulário
         $titulo = trim($_POST['titulo'] ?? '');
         $descricao = trim($_POST['descricao'] ?? '');
         $status = $_POST['status'] ?? 'inativa';
@@ -89,27 +93,19 @@ class AdminController extends Controller
             return !empty(trim($texto));
         });
 
-        // 2. Validação básica
         if (empty($titulo) || count($opcoesTextos) < 2) {
-            // Se a validação falhar, redireciona de volta com uma mensagem de erro
-            // (Uma implementação mais avançada usaria sessões para mostrar os erros)
             echo "Erro: O título é obrigatório e a enquete deve ter pelo menos 2 opções.";
-            // Idealmente, redirecionar de volta para o formulário preenchido
-            // header('Location: ' . $_SERVER['HTTP_REFERER']);
             return;
         }
 
-        // 3. Prepara os dados para o repositório
         $dadosEnquete = [
             'titulo' => $titulo,
             'descricao' => $descricao,
             'status' => $status,
-            // Gera um slug a partir do título (lógica simples)
             'slug' => strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $titulo)),
             'opcoes' => $opcoesTextos
         ];
 
-        // 4. Chama o repositório para salvar os dados
         if ($id === null) {
             // Modo Criação
             $sucesso = $this->enqueteRepository->criarEnquete($dadosEnquete);
@@ -118,9 +114,7 @@ class AdminController extends Controller
             $sucesso = $this->enqueteRepository->atualizarEnquete($id, $dadosEnquete);
         }
 
-        // 5. Redireciona com base no resultado
         if ($sucesso) {
-            // Redireciona para o dashboard em caso de sucesso
             header('Location: /admin/dashboard');
             exit;
         } else {
@@ -135,19 +129,143 @@ class AdminController extends Controller
      */
     public function excluir(int $id)
     {
+        $this->verificarLogin();
         // Garante que a requisição seja via POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             header('Location: /admin/dashboard');
             exit;
         }
 
-        // Chama o repositório para deletar a enquete
         $sucesso = $this->enqueteRepository->deleteById($id);
 
         // TODO: Adicionar mensagens de feedback (sucesso/erro) usando sessão flash.
-
-        // Redireciona de volta para o dashboard em qualquer caso
         header('Location: /admin/dashboard');
+        exit;
+    }
+
+    /**
+     * Exibe a página de resultados de uma enquete específica.
+     * @param int $id O ID da enquete.
+     */
+    public function resultados(int $id)
+    {
+        $this->verificarLogin();
+        // Chama o novo método do repositório
+        $enqueteComResultados = $this->enqueteRepository->findResultados($id);
+
+        if (!$enqueteComResultados) {
+            http_response_code(404);
+            echo "Enquete não encontrada.";
+            return;
+        }
+
+        $dadosParaView = [
+            'pageTitle' => 'Resultados: ' . $enqueteComResultados['titulo'],
+            'enquete' => $enqueteComResultados
+        ];
+
+        // Renderiza a nova view de resultados
+        $this->view('features/admin/views/resultados', $dadosParaView);
+    }
+
+    /**
+     * Exibe a página de login.
+     */ /**
+     * Exibe a página de login usando o layout padrão do sistema.
+     */
+    public function login()
+    {
+        // Prepara os dados para a view (mesmo que seja só o título)
+        $dadosParaView = [
+            'pageTitle' => 'Login - Painel Administrativo'
+        ];
+
+        // Usa o método view() para renderizar a página com o layout completo
+        $this->view('features/admin/views/login', $dadosParaView);
+    }
+    private function verificarLogin()
+    {
+        // Se a sessão do usuário não estiver definida, redireciona para o login
+        if (!isset($_SESSION['usuario_id'])) {
+            header('Location: /admin/login');
+            exit;
+        }
+    }
+    /**
+     * Processa a tentativa de login.
+     */
+   public function autenticar()
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        header('Location: /admin/login');
+        exit;
+    }
+
+    $nomeUsuario = $_POST['nome_usuario'] ?? '';
+    $senha = $_POST['senha'] ?? '';
+
+    $usuario = $this->usuarioRepository->buscarPorUsuarioOuEmail($nomeUsuario);
+
+    // --- LÓGICA DE AUTENTICAÇÃO COM MODO DE TESTE ---
+
+    $loginAprovado = false;
+
+    if ($usuario) {
+        // 1. Tenta a verificação segura primeiro (para o usuário 'admin')
+        if (password_verify($senha, $usuario['senha'])) {
+            $loginAprovado = true;
+        } 
+        // 2. Se a primeira falhar, tenta a verificação insegura (para o usuário 'tester')
+        else if ($senha === $usuario['senha']) {
+            // AVISO: Isto é inseguro e SÓ deve ser usado para depuração!
+            $loginAprovado = true;
+        }
+    }
+
+    // --- FIM DA LÓGICA DE AUTENTICAÇÃO ---
+
+    if ($loginAprovado) {
+        // Login bem-sucedido! Inicia a sessão.
+        $_SESSION['usuario_id'] = $usuario['id'];
+        $_SESSION['usuario_nome'] = $usuario['nome_usuario'];
+
+        header('Location: /admin/dashboard');
+        exit;
+    } else {
+        // Credenciais inválidas para ambos os métodos.
+        $dadosParaView = [
+            'pageTitle' => 'Login - Erro',
+            'erro' => 'Usuário ou senha inválidos.'
+        ];
+        $this->view('features/admin/views/login', $dadosParaView);
+    }
+}
+
+    /**
+     * Faz o logout do usuário.
+     */
+    public function logout()
+    {
+        // Limpa todas as variáveis de sessão
+        $_SESSION = [];
+
+        // Destrói a sessão
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+        session_destroy();
+
+        // Redireciona para a página de login
+        header('Location: /admin/login');
         exit;
     }
 }

@@ -190,7 +190,7 @@ class EnqueteRepository
         try {
             $this->db->beginTransaction();
 
-            // 1. Atualiza a enquete principal
+            // Atualiza a enquete principal
             $sqlEnquete = "UPDATE enquetes SET titulo = :titulo, descricao = :descricao, slug = :slug, status = :status WHERE id = :id";
             $stmtEnquete = $this->db->prepare($sqlEnquete);
             $stmtEnquete->execute([
@@ -200,10 +200,6 @@ class EnqueteRepository
                 ':status' => $dados['status'],
                 ':id' => $id
             ]);
-
-            // 2. Lógica para as opções: Apaga todas as opções antigas e insere as novas.
-            // Esta é a abordagem mais simples e segura para evitar lógica complexa de
-            // verificar quais opções foram adicionadas, removidas ou alteradas.
 
             // Apaga opções antigas
             $stmtDelete = $this->db->prepare("DELETE FROM opcoes WHERE enquete_id = :enquete_id");
@@ -242,6 +238,68 @@ class EnqueteRepository
         } catch (\PDOException $e) {
             error_log("Erro ao excluir enquete: " . $e->getMessage());
             return false;
+        }
+    }
+
+
+    /**
+     * Busca os resultados de uma enquete, incluindo a contagem de votos e percentuais.
+     * @param int $id O ID da enquete.
+     * @return array|null Retorna um array com os dados da enquete e seus resultados, ou null se não encontrada.
+     */
+    public function findResultados(int $id): ?array
+    {
+        try {
+            // 1. Primeiro, busca os dados básicos da enquete para garantir que ela existe.
+            $sqlEnquete = "SELECT id, titulo, descricao FROM enquetes WHERE id = :id";
+            $stmtEnquete = $this->db->prepare($sqlEnquete);
+            $stmtEnquete->execute(['id' => $id]);
+            $enquete = $stmtEnquete->fetch();
+
+            if (!$enquete) {
+                return null; // Enquete não encontrada
+            }
+
+            // 2. Agora, a consulta principal para buscar as opções e contar os votos.
+            // LEFT JOIN: Garante que todas as opções da enquete sejam listadas, mesmo que não tenham votos.
+            // COUNT(v.id): Conta o número de votos para cada opção.
+            // GROUP BY o.id: Agrupa os votos por opção.
+            $sqlResultados = "
+            SELECT 
+                o.id, 
+                o.texto, 
+                COUNT(v.id) as total_votos
+            FROM opcoes o
+            LEFT JOIN votos v ON o.id = v.opcao_id
+            WHERE o.enquete_id = :enquete_id
+            GROUP BY o.id, o.texto
+            ORDER BY total_votos DESC
+        ";
+
+            $stmtResultados = $this->db->prepare($sqlResultados);
+            $stmtResultados->execute(['enquete_id' => $id]);
+            $opcoesComVotos = $stmtResultados->fetchAll();
+
+            // 3. Calcula o total geral de votos para poder calcular os percentuais.
+            $totalGeralVotos = array_sum(array_column($opcoesComVotos, 'total_votos'));
+
+            // 4. Adiciona o percentual a cada opção.
+            foreach ($opcoesComVotos as &$opcao) { // O '&' permite modificar o array diretamente
+                if ($totalGeralVotos > 0) {
+                    $opcao['percentual'] = round(($opcao['total_votos'] / $totalGeralVotos) * 100, 2);
+                } else {
+                    $opcao['percentual'] = 0;
+                }
+            }
+
+            // 5. Adiciona os resultados ao array da enquete.
+            $enquete['resultados'] = $opcoesComVotos;
+            $enquete['total_geral_votos'] = $totalGeralVotos;
+
+            return $enquete;
+        } catch (\PDOException $e) {
+            error_log("Erro ao buscar resultados da enquete: " . $e->getMessage());
+            return null;
         }
     }
 }

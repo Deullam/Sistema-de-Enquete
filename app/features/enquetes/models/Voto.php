@@ -8,7 +8,6 @@
  */
 class Voto
 {
-    // Propriedades privadas (encapsulamento)
     private ?int $id = null;
     private int $enquete_id;
     private int $opcao_id;

@@ -10,12 +10,11 @@ class Router
      * @var string|object
      */
     protected string|object $controller = 'App\Features\Enquetes\Controllers\EnqueteController';
-    protected $method = 'index'; // Método padrão
+    protected $method = 'index'; 
     protected $params = [];
 
     public function __construct()
     {
-        // O construtor fica vazio. A lógica vai para o dispatch.
     }
 
     public function dispatch()
@@ -27,7 +26,7 @@ class Router
             $this->controller = 'App\\Features\\Admin\\Controllers\\AdminController';
             unset($url[0]);
 
-            // O método é a segunda parte da URL (ou 'dashboard' como padrão)
+            
             if (isset($url[1])) {
                 $this->method = $url[1];
                 unset($url[1]);
@@ -41,12 +40,10 @@ class Router
             unset($url[0]);
 
             if (isset($url[1])) {
-                // Se a segunda parte for um método que existe (ex: 'votar'), use-o
                 if (method_exists($this->controller, $url[1])) {
                     $this->method = $url[1];
                     unset($url[1]);
                 } else {
-                    // Senão, é um slug para o método 'exibir'
                     $this->method = 'exibir';
                     $this->params[] = $url[1];
                     unset($url[1]);
@@ -55,9 +52,6 @@ class Router
                 $this->method = 'index'; // /enquetes vai para o index
             }
         }
-        // Adicione mais 'else if' aqui para outras áreas do site no futuro.
-
-        // Instancia o controller
         if (!class_exists($this->controller)) {
             $this->show404("Controller não encontrado: " . $this->controller);
             return;
@@ -79,8 +73,6 @@ class Router
 
     private function parseUrl(): array
     {
-        // Este método pega a URL do 'server.php' e a divide.
-        // O 'server.php' coloca a URL em $_SERVER['REQUEST_URI']
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $uri = trim($uri, '/');
         return explode('/', $uri);

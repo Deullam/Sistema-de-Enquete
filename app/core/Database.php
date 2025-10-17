@@ -1,5 +1,5 @@
 <?php
-namespace App\Core; // Adicione o namespace!
+namespace App\Core;
 
 use PDO;
 use PDOException;
@@ -8,10 +8,10 @@ use PDOException;
  * Database Class
  * Implantação do padrão Singleton para garantir uma única conexão PDO.
  */
-final class Database { // 'final' impede que a classe seja estendida.
+final class Database {
     
-    private static ?self $instance = null; // Armazena a instância única (PHP 7.4+)
-    private PDO $connection; // Armazena o objeto PDO
+    private static ?self $instance = null; 
+    private PDO $connection; 
 
     /**
      * O construtor é privado. Ele carrega o .env e estabelece a conexão.

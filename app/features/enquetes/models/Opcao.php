@@ -8,7 +8,6 @@
  */
 class Opcao
 {
-    // Propriedades privadas (encapsulamento)
     private ?int $id = null;
     private ?int $enquete_id = null;
     private string $texto;
