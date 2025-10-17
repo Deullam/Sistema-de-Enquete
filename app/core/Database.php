@@ -1,202 +1,102 @@
 <?php
+namespace App\Core; // Adicione o namespace!
+
+use PDO;
+use PDOException;
+
 /**
  * Database Class
- * Singleton pattern implementation for database connection
+ * Implantação do padrão Singleton para garantir uma única conexão PDO.
  */
-class Database
-{
-    private static $instance = null;
-    private $connection = null;
-    private $host;
-    private $db_name;
-    private $username;
-    private $password;
+final class Database { // 'final' impede que a classe seja estendida.
+    
+    private static ?self $instance = null; // Armazena a instância única (PHP 7.4+)
+    private PDO $connection; // Armazena o objeto PDO
 
     /**
-     * Private constructor to prevent direct instantiation
+     * O construtor é privado. Ele carrega o .env e estabelece a conexão.
      */
-    private function __construct()
-    {
-        // $this->loadEnv();
-        $this->carregarEnv();
-        // The default values are for docker environment
-        $this->host = getenv('DB_HOST') ?: 'localhost';
-        $this->db_name = getenv('DB_NAME') ?: 'deullam';
-        $this->username = getenv('DB_USER') ?: 'deullam';
-        $this->password = getenv('DB_PASSWORD') ?: 'deullam';
-    }
-private static $conexao = null;
-    
-    /**
-     * Obtém conexão PDO
-     * Se não existir, cria uma nova
-     */
-    public static function conectar()
-    {
-        if (self::$conexao === null) {
-            self::criarConexao();
-        }
+    private function __construct() {
+        $this->loadEnv();
         
-        return self::$conexao;
-    }
-    
-    /**
-     * Cria conexão PDO com MySQL
-     */
-    private static function criarConexao()
-    {
-        //Carrega variáveis do .env
-        self::carregarEnv();
-        
-        // Pega configurações do ambiente
         $host = $_ENV['DB_HOST'] ?? 'localhost';
-        $banco = $_ENV['DB_NAME'] ?? 'deullam';
-        $usuario = $_ENV['DB_USER'] ?? 'deullam';
-        $senha = $_ENV['DB_PASSWORD'] ?? 'deullam';
+        $dbname = $_ENV['DB_NAME'] ?? 'deullam';
+        $user = $_ENV['DB_USER'] ?? 'deullam';
+        $pass = $_ENV['DB_PASSWORD'] ?? 'deullam';
         
-        // Monta string de conexão
-        $dsn = "mysql:host={$host};dbname={$banco};charset=utf8mb4;user={$usuario};password={$senha}";
+        $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
         
-        // Opções de segurança
-        $opcoes = [
+        $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
+            PDO::ATTR_EMULATE_PREPARES => false,
         ];
+
         try {
-            self::$conexao = new PDO($dsn, $usuario, $senha, $opcoes);
+            $this->connection = new PDO($dsn, $user, $pass, $options);
         } catch (PDOException $e) {
-             // Better error handling based on environment
-            if (getenv('APP_DEBUG') === 'true') {
-                throw $e; 
-            } else {
-                // Log error but don't expose details in production
-                error_log('Database connection failed: ' . $e->getMessage());
-                die("Erro ao conectar no banco: " . $e->getMessage());
-            }
+            // Em um ambiente de produção, logue o erro em vez de exibi-lo.
+            error_log('Database Connection Failed: ' . $e->getMessage());
+            // Para o usuário final, uma mensagem genérica é mais segura.
+            die("Ocorreu um erro inesperado. Por favor, tente novamente mais tarde.");
         }
     }
 
     /**
-     * Carrega arquivo .env
+     * O método estático que controla o acesso à instância Singleton.
      */
-    private static function carregarEnv()
-    {
-        // Se já carregou, não faz nada
-        if (isset($_ENV['DB_HOST'])) {
-            return;
-        }
-        $arquivo = __DIR__ . '/../../.env';
-        if (!file_exists($arquivo)) {
-            die("Arquivo .env não encontrado!");
-        }
-        // Lê arquivo linha por linha
-        $linhas = file($arquivo, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        foreach ($linhas as $linha) {
-            $linha = trim($linha);
-            // Ignora comentários e linhas vazias
-            if (empty($linha) || $linha[0] === '#') {
-                continue;
-            }
-            // Separa CHAVE=VALOR
-            if (strpos($linha, '=') !== false) {
-                list($chave, $valor) = explode('=', $linha, 2);
-                
-                $chave = trim($chave);
-                $valor = trim($valor);
-                // Remove aspas se tiver
-                $valor = trim($valor, '"\'');
-                // Salva na variável de ambiente
-                $_ENV[$chave] = $valor;
-                putenv("{$chave}={$valor}");
-            }
-        }
-    }
-
-    /**
-     * Retorna instância única do Banco de dados
-     * @return Database
-     */
-    public static function getInstance()
-    {
+    public static function getInstance(): self {
         if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
     }
-     
+
     /**
-     * Executa query com parâmetros (prepared statement)
-     * @param string $query SQL query com placeholders
-     * @param array $params Parametros para bindar na query
-     * @return PDOStatement|false
+     * Retorna o objeto de conexão PDO bruto para ser usado em repositórios.
+     * É a forma mais flexível de usar a classe.
      */
-      /**
-     * Executa query com parâmetros (prepared statement)
-     */
-    public static function query($sql, $parametros = [])
-    {
-        $conexao = self::conectar();
-        $stmt = $conexao->prepare($sql);
-        $stmt->execute($parametros);
-        
-        return $stmt;
+    public function getConnection(): PDO {
+        return $this->connection;
     }
 
     /**
-     * Busca um único registro
-     * @param string $query SQL query com placeholders
-     * @param array $params Parametros para bindar na query
-     * @return array|false Registro único ou false em caso de falha
+     * Carrega as variáveis de ambiente do arquivo .env.
+     * Método privado para ser usado apenas pelo construtor.
      */
-    public function single($query, $params = [])
-    {
-        $stmt = $this->query($query, $params);
-        return $stmt ? $stmt->fetch() : false;
+    private function loadEnv(): void {
+        if (isset($_ENV['DB_HOST'])) {
+            return; // Já carregado
+        }
+
+        $envFile = __DIR__ . '/../../.env';
+        if (!file_exists($envFile)) {
+            die("Arquivo de configuração .env não encontrado.");
+        }
+
+        $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($lines as $line) {
+            if (strpos(trim($line), '#') === 0 || strpos($line, '=') === false) {
+                continue;
+            }
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value, " \t\n\r\0\x0B\"'");
+            
+            $_ENV[$key] = $value;
+            putenv("$key=$value");
+        }
     }
 
     /**
-     * Busca múltiplos registros
-     * @param string $query SQL query com placeholders
-     * @param array $params Parametros para bindar na query
-     * @return array|false Array de registros ou false em caso de falha
+     * Impede a clonagem da instância.
      */
-    public function resultSet($query, $params = [])
-    {
-        $stmt = $this->query($query, $params);
-        return $stmt ? $stmt->fetchAll() : false;
-    }
+    private function __clone() {}
 
-    
     /**
-     * Retorna ID do último insert
+     * Impede a desserialização da instância.
      */
-    public static function ultimoId()
-    {
-        return self::conectar()->lastInsertId();
-    }
-    
-    /**
-     * Inicia transação
-     */
-    public static function iniciarTransacao()
-    {
-        return self::conectar()->beginTransaction();
-    }
-    
-    /**
-     * Confirma transação
-     */
-    public static function confirmar()
-    {
-        return self::conectar()->commit();
-    }
-    
-    /**
-     * Cancela transação
-     */
-    public static function cancelar()
-    {
-        return self::conectar()->rollBack();
+    public function __wakeup() {
+        throw new \Exception("Cannot unserialize a singleton.");
     }
 }

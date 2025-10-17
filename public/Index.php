@@ -1,20 +1,37 @@
 <?php
-// Include the Database class
-require_once __DIR__ . '/../app/core/Database.php';
+// public/index.php
 
-echo "Running Database Connection Test...\n";
+/**
+ * AUTOLOADER MANUAL
+ * Carrega as classes automaticamente com base em seus namespaces.
+ */
+spl_autoload_register(function ($className) {
+    // Prefixo do namespace que corresponde à pasta 'app'
+    $namespacePrefix = 'App\\';
+    $baseDir = __DIR__ . '/../app/';
 
-// Test database connection using singleton pattern
-$database = Database::getInstance();
-$connection = $database->connect();
+    // Verifica se a classe pertence ao nosso projeto
+    if (strncmp($namespacePrefix, $className, $len = strlen($namespacePrefix)) !== 0) {
+        return;
+    }
 
-if ($connection) {
-    echo "<h3>SUCCESS: Database connection established!</h3>\n";
-} else {
-    echo "ERROR: Failed to connect to database.\n";
-    exit(1);
-}
+    // Converte o namespace em caminho de arquivo
+    // Ex: App\Features\Enquetes\Controllers\EnqueteController
+    //  -> app/features/enquetes/controllers/enquetecontroller.php
+    $relativeClass = substr($className, $len);
+    
+    // IMPORTANTE: Sua estrutura usa 'controllers' com 'c' minúsculo.
+    // Vamos garantir que o caminho gerado também seja minúsculo.
+    $file = $baseDir . str_replace('\\', '/', strtolower($relativeClass)) . '.php';
 
-echo "Database test completed successfully.\n";
+    if (file_exists($file)) {
+        require $file;
+    }
+});
 
-?>
+// Agora que o autoloader está pronto, instanciamos o roteador.
+// O autoloader vai carregar 'App\Core\Router' automaticamente.
+use App\Core\Router;
+
+$router = new Router();
+$router->dispatch(); // O método dispatch cuidará de tudo

@@ -1,9 +1,13 @@
+# Ativa o motor de reescrita de URLs do Apache
 RewriteEngine On
-RewriteBase /
 
-# If the requested file or directory exists, serve it directly
+# Evita que o Apache aplique as regras a pastas ou arquivos que já existem
+# Se a requisição for para um arquivo real (ex: /css/style.css), serve o arquivo diretamente.
 RewriteCond %{REQUEST_FILENAME} !-f
+# Se a requisição for para um diretório real, serve o diretório diretamente.
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Otherwise, route all requests to index.php
-RewriteRule ^(.*)$ index.php [QSA,L]
+# Para todas as outras requisições, redireciona para o index.php
+# A URL original (ex: "enquetes/minha-enquete") é capturada e passada
+# como um parâmetro GET chamado 'url'.
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
