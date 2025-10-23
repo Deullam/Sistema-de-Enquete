@@ -23,9 +23,9 @@ services:
     container_name: mysql_db
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: deullam
-      MYSQL_USER: deullam
-      MYSQL_PASSWORD: deullam
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: dbroot
+      MYSQL_PASSWORD: rootroot
     ports:
       - "3308:3308"
     volumes:

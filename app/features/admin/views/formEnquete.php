@@ -1,5 +1,7 @@
 <?php
+// Define se estamos no modo de edição (se uma enquete foi passada para a view)
 $tituloPagina = $modoEdicao ? 'Editar Enquete' : 'Criar Nova Enquete';
+// Define a URL para onde o formulário será enviado
 $actionUrl = $modoEdicao ? '/admin/salvar/' . $enquete['id'] : '/admin/salvar';
 ?>
 
