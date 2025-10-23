@@ -20,9 +20,9 @@ final class Database {
         $this->loadEnv();
         
         $host = $_ENV['DB_HOST'] ?? 'localhost';
-        $dbname = $_ENV['DB_NAME'] ?? 'deullam';
-        $user = $_ENV['DB_USER'] ?? 'deullam';
-        $pass = $_ENV['DB_PASSWORD'] ?? 'deullam';
+        $dbname = $_ENV['DB_NAME'] ?? 'mydb';
+        $user = $_ENV['DB_USER'] ?? 'root';
+        $pass = $_ENV['DB_PASSWORD'] ?? 'rootroot';
         
         $dsn = "mysql:host={$host};dbname={$dbname};charset=utf8mb4";
         
