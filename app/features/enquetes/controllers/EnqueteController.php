@@ -4,7 +4,9 @@ namespace App\Features\Enquetes\Controllers;
 
 use App\Core\Controller;
 use App\Features\Enquetes\Models\EnqueteRepository;
-
+/**
+ * Controlador para gerenciar enquetes.
+ */
 class EnqueteController extends Controller
 {
     private EnqueteRepository $enqueteRepository;
@@ -14,9 +16,11 @@ class EnqueteController extends Controller
         $this->enqueteRepository = new EnqueteRepository();
     }
 
+    /**
+     * Exibe a lista de enquetes ativas.
+     */
     public function index()
     {
-        // 1. Pede os dados ao repositório
         $enquetesDoBanco = $this->enqueteRepository->findAllActive();
         $dadosParaView = [
             'pageTitle' => 'Nossas Enquetes',
@@ -37,8 +41,6 @@ class EnqueteController extends Controller
 
         // Verifica se a enquete foi encontrada
         if (!$enquete) {
-            // Se não encontrou, mostra uma página 404.
-            // Você pode criar uma view bonita para isso depois.
             http_response_code(404);
             echo "<h1>404 - Enquete não encontrada</h1>";
             return;
@@ -53,6 +55,9 @@ class EnqueteController extends Controller
         $this->view('features/enquetes/views/DetalheEnqueteView', $dadosParaView);
     }
 
+    /**
+     * Processa o voto em uma enquete.
+     */
     public function votar()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['opcao_id']) && isset($_POST['enquete_id'])) {
@@ -66,7 +71,6 @@ class EnqueteController extends Controller
             }
 
             if (in_array($enqueteId, $_SESSION['enquetes_votadas'])) {
-                // --- USA A VIEW DE ERRO ---
                 $dados = [
                     'pageTitle' => 'Erro na Votação',
                     'titulo_mensagem' => 'Voto Duplicado',

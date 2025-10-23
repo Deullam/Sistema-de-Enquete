@@ -1,11 +1,12 @@
 <?php
-// O namespace segue a estrutura de pastas
 namespace App\Features\Admin\Controllers;
 
 use App\Core\Controller;
 use App\Features\Enquetes\Models\EnqueteRepository; // Vamos reutilizar o repositório de enquetes
 use App\Features\Admin\Models\UsuarioRepository; // Adiciona o repositório de usuários
-
+/**
+ * Controlador para o painel administrativo 
+ */
 class AdminController extends Controller
 {
     private EnqueteRepository $enqueteRepository;
@@ -13,7 +14,7 @@ class AdminController extends Controller
 
     public function __construct()
     {
-        // Instancia o repositório para que possamos usá-lo nos métodos
+        // Injeção de dependências dos repositórios
         $this->enqueteRepository = new EnqueteRepository();
         $this->usuarioRepository = new UsuarioRepository();
     }

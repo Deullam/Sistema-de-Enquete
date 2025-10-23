@@ -22,7 +22,7 @@ class UsuarioRepository
     public function buscarPorUsuarioOuEmail(string $nomeUsuario): ?array
     {
         try {
-            // CORREÇÃO: Usando placeholders anônimos (?)
+            // Usando placeholders anônimos (?)
             $sql = "SELECT id, nome_usuario, senha FROM usuarios WHERE nome_usuario = ? OR email = ?";
 
             $stmt = $this->db->prepare($sql);

@@ -32,7 +32,7 @@ $actionUrl = $modoEdicao ? '/admin/salvar/' . $enquete['id'] : '/admin/salvar';
     <div id="opcoes-container">
         <?php 
         // Se estiver editando, mostra as opções existentes
-        $opcoes = $enquete['opcoes'] ?? [['texto' => ''], ['texto' => '']]; // Padrão de 2 opções vazias para criação
+        $opcoes = $enquete['opcoes'] ?? [['texto' => ''], ['texto' => '']];
         foreach ($opcoes as $index => $opcao): ?>
             <div class="form-grupo">
                 <label for="opcao-<?php echo $index; ?>">Opção <?php echo $index + 1; ?></label>
@@ -42,8 +42,6 @@ $actionUrl = $modoEdicao ? '/admin/salvar/' . $enquete['id'] : '/admin/salvar';
             </div>
         <?php endforeach; ?>
     </div>
-    <!-- No futuro, um botão "Adicionar Opção" com JavaScript pode ser colocado aqui -->
-
     <div class="form-acoes">
         <button type="submit" class="btn-principal">Salvar Enquete</button>
         <a href="/admin/dashboard" class="btn-secundario">Cancelar</a>

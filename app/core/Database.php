@@ -66,7 +66,7 @@ final class Database {
      */
     private function loadEnv(): void {
         if (isset($_ENV['DB_HOST'])) {
-            return; // Já carregado
+            return;
         }
 
         $envFile = __DIR__ . '/../../.env';

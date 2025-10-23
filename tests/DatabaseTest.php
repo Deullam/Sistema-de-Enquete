@@ -52,19 +52,17 @@ class DatabaseTest {
             echo "   Não foi possível conectar ao banco de dados.\n";
             echo "   Mensagem: " . $e->getMessage() . "\n";
             echo "   Verifique suas credenciais no arquivo .env (DB_HOST, DB_NAME, DB_USER, DB_PASSWORD).\n";
-            exit(1); // Sai com código de erro
+            exit(1); 
 
         } catch (\Exception $e) {
-            // Captura qualquer outra exceção que possa ocorrer.
             echo "\n❌ ERRO INESPERADO (Exception):\n";
             echo "   Mensagem: " . $e->getMessage() . "\n";
-            exit(1); // Sai com código de erro
+            exit(1); 
         }
 
         echo "\nTeste de banco de dados concluído.\n";
     }
 }
 
-// Cria uma instância da classe de teste e executa o teste.
 $test = new DatabaseTest();
 $test->run();

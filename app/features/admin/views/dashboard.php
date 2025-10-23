@@ -20,7 +20,6 @@
                     <td><?php echo $enquete['id']; ?></td>
                     <td><?php echo htmlspecialchars($enquete['titulo']); ?></td>
                     <td>
-                        <!-- Adiciona uma classe CSS baseada no status para estilização -->
                         <span class="status status-<?php echo htmlspecialchars($enquete['status']); ?>">
                             <?php echo ucfirst($enquete['status']); // Deixa a primeira letra maiúscula 
                             ?>
@@ -28,7 +27,6 @@
                     </td>
                     <td>
                         <?php
-                        // Formata a data para o padrão brasileiro
                         $data = new DateTime($enquete['criado_em']);
                         echo $data->format('d/m/Y H:i');
                         ?>

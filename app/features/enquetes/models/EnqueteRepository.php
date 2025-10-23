@@ -4,7 +4,9 @@ namespace App\Features\Enquetes\Models;
 
 use App\Core\Database;
 use PDO;
-
+/**
+ * Repositório para gerenciar operações de banco de dados relacionadas a enquetes.
+ */
 class EnqueteRepository
 {
     private PDO $db;

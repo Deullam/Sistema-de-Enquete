@@ -1,6 +1,6 @@
 -- Cria e utiliza o banco de dados
-CREATE DATABASE IF NOT EXISTS deullam;
-USE deullam;
+CREATE DATABASE IF NOT EXISTS enquete;
+USE enquete;
 
 -- Apaga as tabelas se existirem para evitar conflitos
 DROP TABLE IF EXISTS votos;
