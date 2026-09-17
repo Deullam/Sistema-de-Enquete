@@ -74,7 +74,9 @@ test.describe('EN-09 admin results page', () => {
     const response = await admin.get(`/admin/resultados/${poll.id}`);
     expect(response.status()).toBe(200);
     const html = await response.text();
-    expect(html).not.toMatch(/NAN|INF|Division by zero|Warning:|Fatal error/i);
+    // NAN/INF são os literais que o PHP imprime para float inválido; com limite de palavra e
+    // sensível a maiúsculas, para não casar com "info-total-votos" ou "Fernando".
+    expect(html).not.toMatch(/\bNAN\b|\bINF\b|Division by zero|Warning:|Fatal error/);
 
     const results = await resultsOf(admin, poll.id);
     expect(results.total).toBe(0);
