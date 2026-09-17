@@ -1,0 +1,22 @@
+# Imagem SÓ para os testes E2E. Contexto de build = raiz do repositório
+# (ver docker-compose.e2e.yml). Não substitui o Dockerfile da raiz.
+FROM php:8.4-apache
+
+RUN docker-php-ext-install pdo_mysql && a2enmod rewrite
+
+# public/index.php faz require de ../app, e app/core/Database.php lê ../../.env:
+# por isso o repositório inteiro vai para /var/www/html e só public/ é o DocumentRoot.
+RUN sed -ri 's!/var/www/html!/var/www/html/public!g' \
+        /etc/apache2/sites-available/000-default.conf /etc/apache2/apache2.conf \
+    && printf '<Directory /var/www/html/public>\n    AllowOverride All\n    Require all granted\n</Directory>\n' \
+        > /etc/apache2/conf-available/z-e2e-public.conf \
+    && a2enconf z-e2e-public
+
+COPY app/ /var/www/html/app/
+COPY public/ /var/www/html/public/
+COPY tests-e2e/docker-entrypoint.e2e.sh /usr/local/bin/docker-entrypoint.e2e.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.e2e.sh
+
+WORKDIR /var/www/html
+ENTRYPOINT ["docker-entrypoint.e2e.sh"]
+CMD ["apache2-foreground"]

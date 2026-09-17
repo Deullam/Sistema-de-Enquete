@@ -1,0 +1,4 @@
+# Scripts e compose vão para dentro de containers Linux: sempre LF, mesmo em Windows.
+*.sh text eol=lf
+*.yml text eol=lf
+Dockerfile.e2e text eol=lf

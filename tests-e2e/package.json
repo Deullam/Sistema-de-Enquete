@@ -1,0 +1,13 @@
+{
+  "name": "sistema-de-enquete-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Testes E2E em HTTP puro (Playwright request) contra a pilha real em contêiner",
+  "scripts": {
+    "test": "playwright test",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1"
+  }
+}
