@@ -1,5 +1,9 @@
+-- Este arquivo é UTF-8: declara o charset da sessão para o import não dobrar os acentos
+-- (sem isto, clientes com latin1 por padrão gravam "Programação" como "ProgramaÃ§Ã£o").
+SET NAMES utf8mb4;
+
 -- Cria e utiliza o banco de dados
-CREATE DATABASE IF NOT EXISTS enquete;
+CREATE DATABASE IF NOT EXISTS enquete CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE enquete;
 
 -- Apaga as tabelas se existirem para evitar conflitos
