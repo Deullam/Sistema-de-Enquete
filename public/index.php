@@ -19,12 +19,16 @@ spl_autoload_register(function ($className) {
 
     // Converte o namespace em caminho de arquivo
     // Ex: App\Features\Enquetes\Controllers\EnqueteController
-    //  -> app/features/enquetes/controllers/enquetecontroller.php
+    //  -> app/features/enquetes/controllers/EnqueteController.php
     $relativeClass = substr($className, $len);
-    
-    // IMPORTANTE: Sua estrutura usa 'controllers' com 'c' minúsculo.
-    // Vamos garantir que o caminho gerado também seja minúsculo.
-    $file = $baseDir . str_replace('\\', '/', strtolower($relativeClass)) . '.php';
+
+    // Diretórios em minúsculo (app/core, app/features/admin/controllers), mas o nome do
+    // arquivo preserva o PascalCase da classe (Router.php, AdminController.php): em sistemas
+    // de arquivos sensíveis a maiúsculas (Linux, contêiner) o lowercase total não encontra nada.
+    $parts = explode('\\', $relativeClass);
+    $class = array_pop($parts);
+    $dir = $parts ? strtolower(implode('/', $parts)) . '/' : '';
+    $file = $baseDir . $dir . $class . '.php';
 
     if (file_exists($file)) {
         require $file;

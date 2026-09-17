@@ -80,7 +80,7 @@ class Router
         if ($method === "" || str_starts_with($method, "__") || !method_exists($controller, $method)) {
             return false;
         }
-        $reflection = new ReflectionMethod($controller, $method);
+        $reflection = new \ReflectionMethod($controller, $method);
         return $reflection->isPublic() && !$reflection->isStatic();
     }
 

@@ -46,7 +46,7 @@ class AdminController extends Controller
         $dadosParaView = [
             'pageTitle' => 'Criar Nova Enquete',
             'modoEdicao' => false,
-            'enquete' => 'null'
+            'enquete' => null
         ];
         $this->view('features/admin/views/formEnquete', $dadosParaView);
     }
