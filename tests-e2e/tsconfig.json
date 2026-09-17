@@ -1,0 +1,17 @@
+{
+  // Só para checagem de tipos (Playwright transpila sem checar). Sem typescript/@types/node no
+  // package.json de propósito: npx -y -p typescript -p @types/node sh -c 'tsc --noEmit -p tsconfig.json --typeRoots "$(dirname "$(command -v tsc)")/../@types"'
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["playwright.config.ts", "global-setup.ts", "helpers/**/*.ts", "tests/**/*.ts"]
+}

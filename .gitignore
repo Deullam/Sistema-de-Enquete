@@ -416,3 +416,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Testes E2E (tests-e2e/)
+tests-e2e/node_modules/
+tests-e2e/test-results/
+tests-e2e/playwright-report/
+# A regra genérica *.e2e (acima) esconderia o Dockerfile da suíte.
+!tests-e2e/Dockerfile.e2e

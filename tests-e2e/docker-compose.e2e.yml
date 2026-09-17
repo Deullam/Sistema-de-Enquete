@@ -1,0 +1,57 @@
+# Pilha efêmera SÓ para os testes E2E (HTTP puro via Playwright request).
+# Independente do docker-compose.yml da raiz (que o README documenta como quebrado).
+#
+#   cd tests-e2e
+#   docker compose -f docker-compose.e2e.yml up -d --wait
+#   npm ci && npm test
+#   docker compose -f docker-compose.e2e.yml down -v
+#
+# Sem volumes persistentes: cada `up` parte do database.sql limpo (seed: admin/admin123
+# + três enquetes de exemplo). Credenciais abaixo são sintéticas, só valem aqui.
+name: enquete-e2e
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: e2e-root-secret # gitleaks:allow
+      MYSQL_DATABASE: enquete
+      MYSQL_USER: enquete_e2e
+      MYSQL_PASSWORD: enquete_e2e_secret # gitleaks:allow
+    volumes:
+      # database.sql cria o banco `enquete`, as tabelas e o seed.
+      - ../database.sql:/docker-entrypoint-initdb.d/001-database.sql:ro
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      # --protocol=tcp: o servidor temporário que roda os scripts de init só escuta em
+      # socket unix, então o ping por TCP só responde quando o MySQL definitivo subiu.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --protocol=tcp -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+      start_period: 20s
+
+  app:
+    build:
+      context: ..
+      dockerfile: tests-e2e/Dockerfile.e2e
+    environment:
+      # O entrypoint gera /var/www/html/.env a partir destas variáveis
+      # (Database::loadEnv() lê app/../../.env = /var/www/html/.env).
+      DB_HOST: db
+      DB_NAME: enquete
+      DB_USER: enquete_e2e
+      DB_PASSWORD: enquete_e2e_secret # gitleaks:allow
+    ports:
+      - "8089:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      # Só confirma que o Apache responde; o conteúdo é responsabilidade dos specs.
+      test: ["CMD-SHELL", "curl -sS -o /dev/null http://localhost/enquetes || exit 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
