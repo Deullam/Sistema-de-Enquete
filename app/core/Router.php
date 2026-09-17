@@ -40,7 +40,7 @@ class Router
             unset($url[0]);
 
             if (isset($url[1])) {
-                if (method_exists($this->controller, $url[1])) {
+                if ($this->isPublicAction($this->controller, $url[1])) {
                     $this->method = $url[1];
                     unset($url[1]);
                 } else {
@@ -61,8 +61,8 @@ class Router
         // Pega os parâmetros restantes
         $this->params = array_merge($this->params, $url ? array_values($url) : []);
 
-        // Verifica se o método existe e chama
-        if (!method_exists($this->controller, $this->method)) {
+        // Verifica se o método existe, é público e não é mágico antes de chamar
+        if (!$this->isPublicAction($this->controller, $this->method)) {
             $this->show404("Método não encontrado: " . $this->method . " no controller " . get_class($this->controller));
             return;
         }
@@ -70,6 +70,19 @@ class Router
         call_user_func_array([$this->controller, $this->method], $this->params);
     }
 
+
+    /**
+     * Só métodos públicos, não estáticos e não mágicos podem ser despachados por URL.
+     * Sem isso, helpers herdados de Controller (como view()) ficariam acessíveis sem login.
+     */
+    private function isPublicAction(string|object $controller, string $method): bool
+    {
+        if ($method === "" || str_starts_with($method, "__") || !method_exists($controller, $method)) {
+            return false;
+        }
+        $reflection = new ReflectionMethod($controller, $method);
+        return $reflection->isPublic() && !$reflection->isStatic();
+    }
 
     private function parseUrl(): array
     {
@@ -81,7 +94,8 @@ class Router
     private function show404($message = "Página não encontrada")
     {
         http_response_code(404);
-        echo "<h1>Erro 404</h1><p>{$message}</p>";
+        // $message carrega trechos da URL pedida, por isso é escapado na saída.
+        echo "<h1>Erro 404</h1><p>" . htmlspecialchars($message, ENT_QUOTES, 'UTF-8') . "</p>";
         exit;
     }
 }

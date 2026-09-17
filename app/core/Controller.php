@@ -9,7 +9,7 @@ class Controller
      * @param string $viewPath O caminho para a view a partir da pasta 'app/features/'
      * @param array $data Os dados que a view poderá usar (ex: $titulo, $enquetes)
      */
-    public function view(string $viewPath, array $data = []) {
+    protected function view(string $viewPath, array $data = []) {
         extract($data);
 
         // Caminho para os arquivos de layout

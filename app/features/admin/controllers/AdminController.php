@@ -209,23 +209,9 @@ class AdminController extends Controller
 
     $usuario = $this->usuarioRepository->buscarPorUsuarioOuEmail($nomeUsuario);
 
-    // --- LÓGICA DE AUTENTICAÇÃO COM MODO DE TESTE ---
-
-    $loginAprovado = false;
-
-    if ($usuario) {
-        // 1. Tenta a verificação segura primeiro (para o usuário 'admin')
-        if (password_verify($senha, $usuario['senha'])) {
-            $loginAprovado = true;
-        } 
-        // 2. Se a primeira falhar, tenta a verificação insegura (para o usuário 'tester')
-        else if ($senha === $usuario['senha']) {
-            // AVISO: Isto é inseguro e SÓ deve ser usado para depuração!
-            $loginAprovado = true;
-        }
-    }
-
-    // --- FIM DA LÓGICA DE AUTENTICAÇÃO ---
+    // Autenticação: a senha só é aceita quando confere com o hash bcrypt
+    // guardado no banco. Não existe caminho alternativo de comparação.
+    $loginAprovado = $usuario !== null && password_verify($senha, $usuario['senha']);
 
     if ($loginAprovado) {
         // Login bem-sucedido! Inicia a sessão.
@@ -235,7 +221,7 @@ class AdminController extends Controller
         header('Location: /admin/dashboard');
         exit;
     } else {
-        // Credenciais inválidas para ambos os métodos.
+        // Credenciais inválidas.
         $dadosParaView = [
             'pageTitle' => 'Login - Erro',
             'erro' => 'Usuário ou senha inválidos.'

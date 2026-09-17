@@ -44,10 +44,11 @@ CREATE TABLE votos (
     FOREIGN KEY (opcao_id) REFERENCES opcoes(id) ON DELETE CASCADE
 );
 
--- Insere um usuário administrador (senha: admin123)
+-- Usuário administrador de DEMONSTRAÇÃO.
+-- Senha: admin123 (hash bcrypt gerado com password_hash/PASSWORD_DEFAULT).
+-- Troque esta senha antes de usar o projeto fora de um ambiente de demonstração.
 INSERT INTO usuarios (nome_usuario, email, senha) VALUES 
-('admin', 'admin@example.com', '$2y$10$.MHAWDFkSxYSqaZSbJCliOi30C/nEoRfYr1zICMKWRGGa.uDiJeu.'),
-('testar', 'testar@example.com', 'admin123');
+('admin', 'admin@example.com', '$2y$10$.MHAWDFkSxYSqaZSbJCliOi30C/nEoRfYr1zICMKWRGGa.uDiJeu.');
 
 -- === INSERÇÃO DE DADOS EM PORTUGUÊS ===
 
