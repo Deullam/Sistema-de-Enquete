@@ -139,6 +139,21 @@ Os defeitos conhecidos, todos ainda abertos:
 
 Consertar isso é trabalho de uma próxima rodada.
 
+## Testes E2E (HTTP, contêiner)
+
+A pasta `tests-e2e/` tem uma suíte Playwright em modo HTTP puro (`request`, sem
+navegador) que exercita a pilha real: `php:8.4-apache` + `mysql:8.0` com o
+`database.sql` carregado, num compose próprio de teste (`docker-compose.e2e.yml`,
+independente do Docker quebrado acima). Um spec por jornada (EN-01 a EN-10).
+Requer Docker e Node 22; nada de PHP no host.
+
+```bash
+cd tests-e2e && docker compose -f docker-compose.e2e.yml up -d --wait && npm ci && npm test && docker compose -f docker-compose.e2e.yml down -v
+```
+
+A aplicação de teste fica em `http://localhost:8089`. Sempre derrube com
+`down -v` ao final: a pilha não tem volume persistente e cada `up` parte do seed limpo.
+
 ## Estrutura do projeto
 
 ```
