@@ -1,132 +1,174 @@
-# 🚀 Sistema de Enquetes em PHP Puro
+# Sistema de Enquetes em PHP Puro
 
-![Demonstração do Projeto](https://img.shields.io/badge/Status-Concluído-brightgreen )
-![Licença](https://img.shields.io/badge/Licença-MIT-blue )
+![Licença](https://img.shields.io/badge/Licença-MIT-blue)
+![PHP](https://img.shields.io/badge/PHP-8%2B-777BB4?logo=php)
+![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql)
 
-Este projeto é a implementação de um sistema de enquetes online, desenvolvido como parte de uma prova prática. O sistema foi construído utilizando PHP puro, seguindo o padrão de arquitetura MVC (Model-View-Controller) e princípios de Orientação a Objetos.
+Sistema de enquetes online escrito em PHP puro, sem framework e sem dependências
+de terceiros. A organização segue o padrão MVC, com um roteador próprio, views em
+PHP e acesso ao banco via PDO com prepared statements.
 
-O projeto inclui uma área pública para visualização e votação em enquetes, e um painel administrativo protegido por senha para gerenciamento completo das enquetes (CRUD - Criar, Ler, Atualizar, Excluir) e visualização dos resultados.
+O projeto tem uma área pública, onde qualquer visitante lista e vota em enquetes,
+e um painel administrativo protegido por login, onde as enquetes são criadas,
+editadas, excluídas e têm seus resultados consultados.
 
-## ✨ Funcionalidades
+Este é um projeto de demonstração, feito como prova prática. Ele **não está
+preparado para uso em produção**: veja a seção *Limitações conhecidas*.
 
-### 🌐 Área Pública
-*   Listagem de enquetes ativas.
-*   Página de detalhes para cada enquete com opções de voto.
-*   Sistema de votação com validação para evitar votos duplicados por sessão.
-*   URLs amigáveis (ex: `/enquetes/qual-sua-cor-favorita`).
+## Funcionalidades
 
-### 🔒 Área Administrativa
-*   Acesso protegido por login e senha.
-*   Dashboard com a listagem de todas as enquetes (ativas e inativas).
-*   Funcionalidades CRUD completas para enquetes e suas opções.
-*   Página de visualização dos resultados de cada enquete, com contagem de votos e percentuais.
+### Área pública
+* Listagem das enquetes ativas.
+* Página de detalhe de cada enquete, com as opções de voto.
+* Registro de voto com verificação de voto duplicado.
+* URLs amigáveis por slug (ex.: `/enquetes/linguagem-programacao`).
 
-## 🛠️ Tecnologias Utilizadas
+### Painel administrativo
+* Login por usuário ou e-mail, com senha verificada por `password_verify()`
+  contra o hash bcrypt guardado no banco.
+* Listagem de todas as enquetes, ativas e inativas.
+* Criação, edição e exclusão de enquetes e de suas opções.
+* Página de resultados por enquete, com contagem de votos e percentuais.
 
-O projeto foi construído com as seguintes tecnologias e ferramentas:
+## Tecnologias
 
-![PHP](https://img.shields.io/badge/PHP-8.2%2B-777BB4?style=for-the-badge&logo=php )
-![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql )
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?style=for-the-badge&logo=javascript )
-![jQuery](https://img.shields.io/badge/jQuery-3.7-0769AD?style=for-the-badge&logo=jquery )
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5 )
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3 )
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker )
-![Docker Compose](https://img.shields.io/badge/Docker%20Compose-3B74D8?style=for-the-badge&logo=docker )
-![Apache](https://img.shields.io/badge/Apache-D22128?style=for-the-badge&logo=apache )
+PHP 8 (sem framework, sem Composer), MySQL 8 e HTML/CSS escritos à mão.
 
-## ⚙️ Pré-requisitos
+O projeto **não usa JavaScript**: não há nenhum arquivo `.js` nem nenhuma tag
+`<script>` em todo o código. Toda a interação acontece por formulários HTML e
+navegação normal entre páginas.
 
-Antes de começar, garanta que você tem os seguintes softwares instalados:
+## Pré-requisitos
 
-*   **Para rodar sem Docker:**
-    *   PHP 8 ou superior
-    *   MySQL Server
-    *   Um cliente de banco de dados (DBeaver, HeidiSQL, phpMyAdmin)
-*   **Para rodar com Docker:** (Em progresso)
-    *   Docker
-    *   Docker Compose
+* PHP 8 ou superior, com as extensões `pdo` e `pdo_mysql`.
+* MySQL Server 8.
+* Um cliente de banco de dados para importar o schema (linha de comando,
+  DBeaver, HeidiSQL, phpMyAdmin ou equivalente).
 
-## 🚀 Como Rodar o Projeto
+## Como rodar
 
-Você pode executar o projeto de duas maneiras: utilizando Docker (recomendado para facilidade) ou manualmente com um ambiente PHP local.
+O caminho suportado é o manual, descrito abaixo. O empacotamento Docker que está
+no repositório **não funciona** — veja a seção seguinte.
 
-### Método 1: 🐳 Com Docker (Em progresso)
+1. **Clone o repositório:**
+   ```bash
+   git clone https://github.com/Deullam/Sistema-de-Enquete.git
+   cd Sistema-de-Enquete
+   ```
 
-Esta é a forma mais simples de rodar o projeto, pois o Docker cuida de toda a configuração do ambiente.
+2. **Crie o banco e importe o schema.**
+   O arquivo `database.sql` cria o banco `enquete`, cria as tabelas e insere os
+   dados iniciais (o usuário administrador de demonstração e três enquetes de
+   exemplo). Atenção: o script começa com `DROP TABLE IF EXISTS`, então ele apaga
+   e recria as tabelas a cada importação.
+   ```bash
+   mysql -u seu_usuario -p < database.sql
+   ```
 
-1.  **Clone o Repositório:**
-    ```bash
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
-    ```
+3. **Configure o `.env`.**
+   Copie `.env.example` para `.env` e ajuste as variáveis para o seu banco local.
+   `DB_NAME` precisa ser `enquete`, que é o banco criado pelo `database.sql`:
+   ```bash
+   cp .env.example .env
+   ```
+   ```
+   DB_HOST=localhost
+   DB_NAME=enquete
+   DB_USER=seu_usuario
+   DB_PASSWORD=sua_senha
+   ```
+   O arquivo `.env` é obrigatório: sem ele a aplicação para com uma mensagem de
+   configuração não encontrada.
 
-2.  **Configure o Ambiente:**
-    Renomeie o arquivo `.env.example` para `.env`. As credenciais padrão já estão configuradas para funcionar com o `docker-compose.yml`.
-    ```bash
-    cp .env.example .env
-    ```
+4. **Suba o servidor embutido do PHP**, a partir da raiz do projeto:
+   ```bash
+   php -S localhost:8000 -t public
+   ```
+   O `-t public` é necessário: só a pasta `public` deve ser exposta, para que o
+   código em `app/` fique fora do alcance do navegador.
 
-3.  **Suba os Containers:**
-    Execute o Docker Compose. Este comando irá construir a imagem do PHP, baixar a imagem do MySQL e iniciar os dois serviços em segundo plano.
-    ```bash
-    docker-compose up -d --build
-    ```
+5. **Acesse** `http://localhost:8000`.
+   O painel fica em `http://localhost:8000/admin/login`.
 
-4.  **Acesse o Projeto:**
-    O sistema estará disponível no seu navegador no endereço:
-    ➡️ `http://localhost:8000`
+## Credenciais de demonstração
 
-5.  **Acessar o Banco de Dados (Opcional ):**
-    O banco de dados MySQL estará rodando e acessível na porta `3306` da sua máquina local. Você pode usar um cliente de banco de dados para se conectar com as credenciais do arquivo `.env`.
+O `database.sql` cria um único usuário, para demonstração:
 
-6.  **Para Parar o Projeto:**
-    ```bash
-    docker-compose down
-    ```
+* **Usuário:** `admin`
+* **Senha:** `admin123`
 
-### Método 2: 💻 Manualmente (Sem Docker)
+Essa senha é pública de propósito, porque este é um projeto de demonstração. Se
+for publicar o sistema em qualquer lugar acessível, troque a senha antes: gere um
+novo hash com `password_hash('sua-senha', PASSWORD_DEFAULT)` e atualize a coluna
+`senha` do usuário.
 
-Se preferir não usar Docker, siga estes passos para configurar um ambiente local.
+## Docker: quebrado
 
-1.  **Clone o Repositório:**
-    ```bash
-    git clone https://github.com/seu-usuario/seu-repositorio.git
-    cd seu-repositorio
-    ```
+O repositório contém um `Dockerfile` e um `docker-compose.yml`, mas **o
+empacotamento Docker não sobe a aplicação**. Ele está documentado aqui como
+pendência, não como alternativa de instalação. Use o método manual.
 
-2.  **Configure o Banco de Dados:**
-    *   Crie um novo banco de dados no seu servidor MySQL.
-    *   Importe a estrutura e os dados iniciais utilizando o arquivo `database.sql` fornecido no projeto.
-    *   Exemplo usando o cliente MySQL no terminal:
-        ```bash
-        mysql -u seu_usuario -p seu_banco_de_dados < database.sql
-        ```
+Os defeitos conhecidos, todos ainda abertos:
 
-3.  **Configure o Ambiente (`.env` ):**
-    *   Renomeie o arquivo `.env.example` para `.env`.
-    *   Abra o arquivo `.env` e atualize as variáveis `DB_HOST`, `DB_NAME`, `DB_USER`, e `DB_PASSWORD` com as credenciais do seu banco de dados local.
+1. **O seed nunca é carregado.**
+   O serviço `db` monta `./deullam.sql:/docker-entrypoint-initdb.d/deullam.sql`,
+   mas o arquivo `deullam.sql` não existe no repositório. O Docker então cria um
+   **diretório vazio** com esse nome e o monta no lugar do arquivo, de modo que
+   nenhum schema é importado. O arquivo de seed que existe de verdade chama-se
+   `database.sql`.
 
-4.  **Inicie o Servidor Embutido do PHP:**
-    Na **raiz do projeto**, execute o seguinte comando:
-    ```bash
-    php -S localhost:8000 -t public
-    ```
-    *   `localhost:8000`: Endereço e porta do servidor.
-    *   `-t public`: Define a pasta `public` como a raiz do documento, o que é crucial para a segurança e para que os caminhos de CSS/JS funcionem.
+2. **Diferença de maiúsculas no nome do front controller.**
+   O front controller está em `public/Index.php`, com `I` maiúsculo, enquanto o
+   `public/.htaccess` reescreve para `index.php` e o `public/server.php` faz
+   `require` de `index.php`. No Windows isso passa despercebido, porque o sistema
+   de arquivos não diferencia maiúsculas; dentro do container Linux, diferencia,
+   e o arquivo não é encontrado.
 
-5.  **Acesse o Projeto:**
-    Abra seu navegador e acesse:
-    ➡️ `http://localhost:8000`
+3. **A porta do MySQL não é publicada.**
+   O mapeamento é `3308:3308`, mas o servidor MySQL escuta na `3306` dentro do
+   container. Nada responde na porta `3308` do host.
 
-## 🔑 Credenciais de Acesso
+4. **Banco, usuário e host não batem com o que a aplicação espera.**
+   O compose cria o banco `mydb` com o usuário `dbroot`, enquanto o
+   `database.sql` cria e usa o banco `enquete`. Além disso, o `.env.example` traz
+   `DB_HOST=localhost`, que dentro do container do PHP aponta para o próprio
+   container e não para o serviço de banco — precisaria ser `db`.
 
-Para acessar o painel administrativo, utilize as seguintes credenciais:
+5. **A porta divulgada não é a porta publicada.**
+   As instruções antigas mandavam acessar `http://localhost:8000`, mas o compose
+   publica o serviço PHP em `8888:80`.
 
-*   **Usuário:** `admin`
-*   **Senha:** `admin123`
+Consertar isso é trabalho de uma próxima rodada.
 
-O acesso ao painel pode ser feito através do link no menu de navegação ou diretamente pela URL `/admin/login`.
+## Estrutura do projeto
+
+```
+app/
+  core/                      Router, Controller base e conexão PDO (singleton)
+  features/
+    admin/                   Controller, repositório e views do painel
+    enquetes/                Controller, repositório e views da área pública
+  shared/views/layouts/      Cabeçalho e rodapé comuns
+public/                      Raiz web: front controller, .htaccess e CSS
+tests/DatabaseTest.php       Script de verificação da conexão com o banco
+database.sql                 Schema e dados iniciais
+```
+
+## Limitações conhecidas
+
+Além do Docker, e sendo este um projeto de demonstração:
+
+* Não há proteção contra CSRF nos formulários do painel.
+* A sessão usa a configuração padrão do PHP, sem regeneração de id no login.
+* Não há cadastro nem troca de senha pela interface; o único usuário vem do seed.
+* A página de erro 404 revela o nome da classe e do método procurados.
+* A verificação de voto duplicado olha apenas a sessão do visitante. O endereço
+  IP é gravado na tabela `votos`, mas não é consultado para bloquear repetição,
+  então basta limpar os cookies para votar de novo.
+
+## Licença
+
+MIT. Veja o arquivo `LICENSE`.
 
 ---
 
