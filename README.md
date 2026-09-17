@@ -86,10 +86,6 @@ no repositório **não funciona** — veja a seção seguinte.
    ```
    O `-t public` é necessário: só a pasta `public` deve ser exposta, para que o
    código em `app/` fique fora do alcance do navegador.
-   Em Linux ou macOS (sistemas de arquivos sensíveis a maiúsculas) renomeie antes
-   `public/Index.php` para `public/index.php`: o front controller está com `I`
-   maiúsculo no repositório e o servidor embutido procura `index.php`. No Windows
-   isso passa despercebido.
 
 5. **Acesse** `http://localhost:8000`.
    O painel fica em `http://localhost:8000/admin/login`.
@@ -121,12 +117,11 @@ Os defeitos conhecidos, todos ainda abertos:
    nenhum schema é importado. O arquivo de seed que existe de verdade chama-se
    `database.sql`.
 
-2. **Diferença de maiúsculas no nome do front controller.**
-   O front controller está em `public/Index.php`, com `I` maiúsculo, enquanto o
-   `public/.htaccess` reescreve para `index.php` e o `public/server.php` faz
-   `require` de `index.php`. No Windows isso passa despercebido, porque o sistema
-   de arquivos não diferencia maiúsculas; dentro do container Linux, diferencia,
-   e o arquivo não é encontrado.
+2. **Diferença de maiúsculas no nome do front controller** — corrigido.
+   O front controller estava em `public/Index.php`, com `I` maiúsculo, enquanto o
+   `.htaccess` e o `server.php` apontavam para `index.php`; no Windows passava
+   despercebido, em Linux o arquivo não era encontrado. O arquivo foi renomeado
+   para `public/index.php`.
 
 3. **A porta do MySQL não é publicada.**
    O mapeamento é `3308:3308`, mas o servidor MySQL escuta na `3306` dentro do
