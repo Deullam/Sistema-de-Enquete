@@ -86,6 +86,10 @@ no repositório **não funciona** — veja a seção seguinte.
    ```
    O `-t public` é necessário: só a pasta `public` deve ser exposta, para que o
    código em `app/` fique fora do alcance do navegador.
+   Em Linux ou macOS (sistemas de arquivos sensíveis a maiúsculas) renomeie antes
+   `public/Index.php` para `public/index.php`: o front controller está com `I`
+   maiúsculo no repositório e o servidor embutido procura `index.php`. No Windows
+   isso passa despercebido.
 
 5. **Acesse** `http://localhost:8000`.
    O painel fica em `http://localhost:8000/admin/login`.
